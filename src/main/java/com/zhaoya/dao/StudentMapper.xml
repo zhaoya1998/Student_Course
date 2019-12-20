@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhaoya.dao.StudentMapper">
+	<resultMap type="com.zhaoya.domain.Student" id="stuMap">
+		<id property="sid" column="sid" />
+		<result property="sname" column="sname" />
+		<result property="pwd" column="pwd" />
+		<result property="age" column="age" />
+		<result property="birthday" column="birthday" />
+		<result property="sex" column="sex" />
+
+		<collection property="courses"
+			ofType="com.zhaoya.domain.Course" select="getCourseListBySid"
+			column="sid">
+			<id property="cid" column="cid" />
+			<result property="cname" column="cname" />
+		</collection>
+	</resultMap>
+
+	<select id="getStudentList" resultMap="stuMap">
+		SELECT a.*,TIMESTAMPDIFF(YEAR,birthday,NOW())age from student a
+		<where>
+			<if test="null != sname and sname !=null">
+				and sname like '%${sname}%'
+			</if>
+			<if test="null != start and start !=''">
+				and birthday >='${start}'
+			</if>
+			<if test="null != end and end !=''">
+				and birthday &lt;='${end}'
+			</if>
+		</where>
+	</select>
+
+	<select id="getCourseListBySid"
+		resultType="com.zhaoya.domain.Course">
+		SELECT * from course a LEFT JOIN d_d c on a.cid=c.cid where
+		c.sid=#{sid}
+	</select>
+
+	<delete id="del">
+		delete from student where sid in(${sid})
+	</delete>
+
+	<delete id="delCenter">
+		delete from d_d where sid in(${sid})
+	</delete>
+	
+	<select id="getCourseList" resultType="com.zhaoya.domain.Course">
+	   select * from course
+	</select>
+	<insert id="addStudent">
+	   insert into student set sid=#{sid},sname=#{sname},pwd=#{pwd},birthday=#{birthday},sex=#{sex}
+	</insert>
+	
+	<insert id="addCenter">
+	   insert into d_d set sid=#{sid}, cid=#{cid}
+	</insert>
+	
+	<select id="getStudentById" resultType="com.zhaoya.domain.Student">
+	   select * from student where sid=#{sid}
+	</select>
+	
+	<update id="updateStudent">
+	   update student set sname=#{sname},pwd=#{pwd},birthday=#{birthday},sex=#{sex} where sid=#{sid}
+	</update>
+</mapper>
